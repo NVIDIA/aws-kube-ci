@@ -1,0 +1,39 @@
+aws_kube_setup:
+  stage: aws_kube_setup
+  image:
+    name: hashicorp/terraform:light
+    entrypoint: ["/usr/bin/env"]
+  script:
+    - apk add --no-cache openssh-keygen openssh-client
+    - cd aws-kube-ci
+    - echo "ci_pipeline_id=$CI_PIPELINE_ID" >> terraform.tfvars
+    - ssh-keygen -t rsa -f key
+    - terraform init
+    - terraform apply -auto-approve -var-file=$TF_VAR_FILE
+    - s=$(terraform output)
+    - echo "export ${s//[[:blank:]]/}" > hostname
+  tags:
+    - container-dev
+  artifacts:
+    when: always
+    paths:
+      - aws-kube-ci/key
+      - aws-kube-ci/key.pub
+      - aws-kube-ci/.terraform
+      - aws-kube-ci/terraform.tfstate
+      - aws-kube-ci/hostname
+
+aws_kube_clean:
+  stage: aws_kube_clean
+  image:
+    name: hashicorp/terraform:light
+    entrypoint: ["/usr/bin/env"]
+  script:
+    - cd aws-kube-ci
+    - echo "ci_pipeline_id=$CI_PIPELINE_ID" >> terraform.tfvars
+    - terraform destroy -auto-approve -var-file=$TF_VAR_FILE
+  when: always
+  tags:
+    - container-dev
+  dependencies:
+    - aws_kube_setup
