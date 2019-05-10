@@ -1,0 +1,33 @@
+variables:
+  TF_VAR_FILE: "$CI_PROJECT_DIR/tests/variables.tfvars"
+
+image: alpine
+
+stages:
+  - aws_kube_setup
+  - test_setup
+  - aws_kube_clean
+  - test_cleanup
+
+before_script:
+  - mkdir -p aws-kube-ci
+  - cp * aws-kube-ci/ || true
+
+test_setup:
+  stage: test_setup
+  script:
+    - apk add openssh-client
+    - cd tests && ./test_setup.sh
+  tags:
+    - container-dev
+
+test_cleanup:
+  stage: test_cleanup
+  script:
+    - apk add openssh-client
+    - cd tests && ./test_cleanup.sh
+  tags:
+    - container-dev
+
+include:
+  - local: 'aws-kube-ci.yaml'
