@@ -30,4 +30,4 @@ test_cleanup:
     - container-dev
 
 include:
-  - local: 'aws-kube-ci.yaml'
+  - local: 'aws-kube-ci.yml'

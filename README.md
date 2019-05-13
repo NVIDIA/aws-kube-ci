@@ -12,11 +12,11 @@ To use this CI tool, you need to:
 
 - Place this directory at the root of your repo, with `aws-kube-ci` as name (you
     may want to use submodules)
-- In your `.gitlab-ci.yaml`, define the stages `aws_kube_setup` and `aws_kube_clean`
-- In your `.gitlab-ci.yaml`, include the `aws-kube-ci.yaml` file. For example:
+- In your `.gitlab-ci.yml`, define the stages `aws_kube_setup` and `aws_kube_clean`
+- In your `.gitlab-ci.yml`, include the `aws-kube-ci.yml` file. For example:
 ```yaml
 include:
-  - local: 'aws-kube-ci/aws-kube-ci.yaml'
+  - local: 'aws-kube-ci/aws-kube-ci.yml'
 ```
 - Write a terraform variable file with these variables:
 - `instance_type`: The AWS instance type
@@ -27,7 +27,7 @@ For example:
 instance_type = "g2.2xlarge"
 project_name = "my-project"
 ```
-- In your .gitlab-ci.yaml, set the `TF_VAR_FILE` to the path of the previous file.
+- In your .gitlab-ci.yml, set the `TF_VAR_FILE` to the path of the previous file.
 - Write your ci task. You should write your tasks in a stage which is between `aws_kube_setup` and `aws_kube_clean`.
 
 The `aws_kube_setup` job will expose different files as artifacts:
@@ -40,7 +40,7 @@ A docker registry is running on the VM once the setup is done. You can access it
 using `127.0.0.1:5000`. It could be useful if you need to build a local image
 and use it in the Kubernetes cluster.
 
-A simple `.gitlab-ci.yaml` could be:
+A simple `.gitlab-ci.yml` could be:
 ```yaml
 variables:
   TF_VAR_FILE: "$CI_PROJECT_DIR/variables.tfvars"
@@ -60,5 +60,5 @@ job:
     - aws_kube_setup
 
 include:
-  - local: 'aws-kube-ci/aws-kube-ci.yaml'
+  - local: 'aws-kube-ci/aws-kube-ci.yml'
 ```
