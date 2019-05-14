@@ -6,6 +6,8 @@ This CI tool aims to create a virtual machine on aws with a GPU enabled Kubernet
 master/node. It uses Terraform, Docker, Kubeadm, the driver container and the device
 plugin to setup the VM.
 
+**WARNING:** You can only use this tool in projects on `gitlab-master.nvidia.com`
+
 ## Getting started
 
 To use this CI tool, you need to:
@@ -16,11 +18,12 @@ To use this CI tool, you need to:
 - In your `.gitlab-ci.yml`, include the `aws-kube-ci.yml` file. For example:
 ```yaml
 include:
-  - local: 'aws-kube-ci/aws-kube-ci.yml'
+  project: dl/container-dev/cicd/aws-kube-ci
+  file: aws-kube-ci.yml
 ```
 - Write a terraform variable file with these variables:
-- `instance_type`: The AWS instance type
-- `project_name`: The name of your project
+  - `instance_type`: The AWS instance type
+  - `project_name`: The name of your project
 
 For example:
 ```
@@ -29,6 +32,8 @@ project_name = "my-project"
 ```
 - In your .gitlab-ci.yml, set the `TF_VAR_FILE` to the path of the previous file.
 - Write your ci task. You should write your tasks in a stage which is between `aws_kube_setup` and `aws_kube_clean`.
+- Set the `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` variables in CI/CD
+  settings of the projet
 
 The `aws_kube_setup` job will expose different files as artifacts:
 - The private key to connect to the VM using ssh: `aws-kube-ci/key`
@@ -43,6 +48,7 @@ and use it in the Kubernetes cluster.
 A simple `.gitlab-ci.yml` could be:
 ```yaml
 variables:
+  GIT_SUBMODULE_STRATEGY: recursive
   TF_VAR_FILE: "$CI_PROJECT_DIR/variables.tfvars"
 
 stages:
@@ -60,5 +66,6 @@ job:
     - aws_kube_setup
 
 include:
-  - local: 'aws-kube-ci/aws-kube-ci.yml'
+  project: dl/container-dev/cicd/aws-kube-ci
+  file: aws-kube-ci.yml
 ```
