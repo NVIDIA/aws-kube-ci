@@ -36,6 +36,7 @@ resource "aws_instance" "web" {
 	security_groups = ["default", "allow_ssh"]
 
 	connection {
+		host = self.public_ip
 		type = "ssh"
 		user = "ubuntu"
 		private_key = "${file("key")}"
