@@ -12,8 +12,6 @@ aws_kube_setup:
     - terraform apply -auto-approve -var-file=$TF_VAR_FILE
     - s=$(terraform output)
     - echo "export ${s//[[:blank:]]/}" > hostname
-  tags:
-    - container-dev
   artifacts:
     when: always
     paths:
@@ -33,7 +31,5 @@ aws_kube_clean:
     - echo "ci_pipeline_id=$CI_PIPELINE_ID" >> terraform.tfvars
     - terraform destroy -auto-approve -var-file=$TF_VAR_FILE
   when: always
-  tags:
-    - container-dev
   dependencies:
     - aws_kube_setup
