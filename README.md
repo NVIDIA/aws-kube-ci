@@ -2,11 +2,11 @@
 
 ## Overview
 
-This CI tool aims to create a virtual machine on aws with a GPU enabled Kubernetes
+This CI tool aims to create a virtual machine on AWS with a GPU enabled Kubernetes
 master/node. It uses Terraform, Docker, Kubeadm, the driver container and the device
 plugin to setup the VM.
 
-**WARNING:** You can only use this tool in projects on `gitlab-master.nvidia.com`
+**WARNING:** This tool is in alpha version
 
 ## Getting started
 
@@ -18,7 +18,7 @@ To use this CI tool, you need to:
 - In your `.gitlab-ci.yml`, include the `aws-kube-ci.yml` file. For example:
 ```yaml
 include:
-  project: dl/container-dev/cicd/aws-kube-ci
+  project: nvidia/container-infrastructure/aws-kube-ci
   file: aws-kube-ci.yml
 ```
 - Write a terraform variable file with these variables:
@@ -66,6 +66,6 @@ job:
     - aws_kube_setup
 
 include:
-  project: dl/container-dev/cicd/aws-kube-ci
+  project: nvidia/container-infrastructure/aws-kube-ci
   file: aws-kube-ci.yml
 ```
