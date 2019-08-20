@@ -55,7 +55,7 @@ resource "aws_instance" "web" {
 	}
 
 	provisioner "remote-exec" {
-		inline = ["cd ~ && chmod +x ./setup.sh && sudo ./setup.sh"]
+		inline = ["cd ~ && chmod +x ./setup.sh && sudo ./setup.sh ${var.setup_params}"]
 	}
 }
 
