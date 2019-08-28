@@ -1,5 +1,6 @@
 variables:
   TF_VAR_FILE: "$CI_PROJECT_DIR/tests/variables.tfvars"
+  AWS_KUBE_CI_PARAMS: "--driver --k8s-plugin --nvcr"
 
 image: alpine
 

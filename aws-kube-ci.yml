@@ -6,7 +6,8 @@ aws_kube_setup:
   script:
     - apk add --no-cache openssh-keygen openssh-client
     - cd aws-kube-ci
-    - echo "ci_pipeline_id=$CI_PIPELINE_ID" >> terraform.tfvars
+    - echo "ci_pipeline_id=\"$CI_PIPELINE_ID\"" >> terraform.tfvars
+    - echo "setup_params=\"$AWS_KUBE_CI_PARAMS\"" >> terraform.tfvars
     - ssh-keygen -t rsa -f key
     - terraform init
     - terraform apply -auto-approve -var-file=$TF_VAR_FILE
