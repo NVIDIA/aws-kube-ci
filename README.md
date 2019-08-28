@@ -21,6 +21,9 @@ include:
   project: nvidia/container-infrastructure/aws-kube-ci
   file: aws-kube-ci.yml
 ```
+
+_Note that we include project rather than file here because gitlab doesn't support including local files from submodules_
+
 - Write a terraform variable file with these variables:
   - `instance_type`: The AWS instance type
   - `project_name`: The name of your project
