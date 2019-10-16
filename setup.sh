@@ -13,12 +13,12 @@ install_kubernetes() {
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 	apt-get update
-	apt-get install -y kubelet kubeadm kubectl
-	kubeadm init --pod-network-cidr=192.168.0.0/16
+	apt-get install -y kubeadm=1.13\* kubectl=1.13\* kubelet=1.13\* kubernetes-cni=0.7\*
+	kubeadm init --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
 	mkdir -p /home/ubuntu/.kube
 	cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
 	chown ubuntu:ubuntu /home/ubuntu/.kube/config
-	kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+	kubectl apply -f https://docs.projectcalico.org/v3.9/manifests/calico.yaml
 	kubectl taint nodes --all node-role.kubernetes.io/master-
 }
 
@@ -44,7 +44,7 @@ install_nvidia_runtime() {
 }
 
 install_k8s_device_plugin() {
-	kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0.0-beta/nvidia-device-plugin.yml
+	kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0.0-beta4/nvidia-device-plugin.yml
 }
 
 usage() {
