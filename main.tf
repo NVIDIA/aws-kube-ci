@@ -19,9 +19,9 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_instance" "web" {
-	ami = "${data.aws_ami.ubuntu.id}"
+	ami = data.aws_ami.ubuntu.id
 	
-	instance_type = "${var.instance_type}"
+	instance_type = var.instance_type
 
 	tags = {
 		Name = "${var.project_name}-${var.ci_pipeline_id}"
@@ -39,7 +39,7 @@ resource "aws_instance" "web" {
 		host = self.public_ip
 		type = "ssh"
 		user = "ubuntu"
-		private_key = "${file("key")}"
+		private_key = file("key")
 		agent = false
 		timeout = "3m"
 	}
@@ -61,7 +61,7 @@ resource "aws_instance" "web" {
 
 resource "aws_key_pair" "sshLogin" {
 	key_name   = "${var.project_name}-key-${var.ci_pipeline_id}"
-	public_key = "${file("key.pub")}"
+	public_key = file("key.pub")
 }
 
 output "instance_hostname" {
