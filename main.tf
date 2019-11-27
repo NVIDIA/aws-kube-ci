@@ -54,6 +54,11 @@ resource "aws_instance" "web" {
 		destination = "~/setup.sh"
 	}
 
+	provisioner "file" {
+		source = "config.yml"
+		destination = "~/config.yml"
+	}
+
 	provisioner "remote-exec" {
 		inline = ["cd ~ && chmod +x ./setup.sh && sudo ./setup.sh ${var.setup_params}"]
 	}
