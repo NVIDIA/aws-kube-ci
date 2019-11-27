@@ -13,11 +13,14 @@ install_kubernetes() {
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 	apt-get update
-	apt-get install -y kubeadm=1.13\* kubectl=1.13\* kubelet=1.13\* kubernetes-cni=0.7\*
+	apt-get install -y kubeadm=1.13.12\* kubectl=1.13.12\* kubelet=1.13.12\* kubernetes-cni=0.7\*
+
 	cat <<EOF >/etc/default/kubelet
 KUBELET_EXTRA_ARGS=--feature-gates=KubeletPodResources=true
 EOF
-	kubeadm init --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all
+
+	kubeadm init --config ./config.yml --ignore-preflight-errors=all
+
 	mkdir -p /home/ubuntu/.kube
 	cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
 	chown ubuntu:ubuntu /home/ubuntu/.kube/config
