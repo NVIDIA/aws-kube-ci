@@ -2,6 +2,36 @@
 
 set -xe
 
+
+with_retry() {
+	local max_attempts="$1"
+	local delay="$2"
+	local count=0
+	local rc
+	shift 2
+
+	while true; do
+		set +e
+		"$@"
+		rc="$?"
+		set -e
+
+		count="$((count+1))"
+
+		if [[ "${rc}" -eq 0 ]]; then
+			return 0
+		fi
+
+		if [[ "${max_attempts}" -le 0 ]] || [[ "${count}" -lt "${max_attempts}" ]]; then
+			sleep "${delay}"
+		else
+			break
+		fi
+	done
+
+	return 1
+}
+
 install_docker() {
 	curl https://get.docker.com | sh
 }
@@ -19,7 +49,7 @@ EOF
 KUBELET_EXTRA_ARGS=--feature-gates=KubeletPodResources=true
 EOF
 
-	kubeadm init --config ./config.yml --ignore-preflight-errors=all
+	with_retry 2 5s kubeadm init --config ./config.yml --ignore-preflight-errors=all
 
 	mkdir -p /home/ubuntu/.kube
 	cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
