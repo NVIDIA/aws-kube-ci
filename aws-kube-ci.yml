@@ -1,4 +1,4 @@
-aws_kube_setup:
+.aws_kube_setup:
   stage: aws_kube_setup
   image:
     name: hashicorp/terraform:light
@@ -24,7 +24,7 @@ aws_kube_setup:
       - aws-kube-ci/terraform.tfstate
       - aws-kube-ci/hostname
 
-aws_kube_clean:
+.aws_kube_clean:
   stage: aws_kube_clean
   image:
     name: hashicorp/terraform:light

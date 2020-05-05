@@ -15,11 +15,22 @@ To use this CI tool, you need to:
 - Place this directory at the root of your repo, with `aws-kube-ci` as name (you
     may want to use submodules)
 - In your `.gitlab-ci.yml`, define the stages `aws_kube_setup` and `aws_kube_clean`
-- In your `.gitlab-ci.yml`, include the `aws-kube-ci.yml` file. For example:
+- In your `.gitlab-ci.yml`, include the `aws-kube-ci.yml` file. It is strongly
+  recommended to include a specific version. The version must be a git ref. For example:
 ```yaml
 include:
   project: nvidia/container-infrastructure/aws-kube-ci
   file: aws-kube-ci.yml
+  ref: vX.Y
+```
+- In your `.gitlab-ci.yml`, extends the `.aws_kube_setup` and `.aws_kube_clean`
+  jobs. For example:
+```yaml
+aws_kube_setup:
+  extends: .aws_kube_setup
+
+aws_kube_clean:
+  extends: .aws_kube_clean
 ```
 
 _Note that we include project rather than file here because gitlab doesn't support including local files from submodules_
@@ -59,6 +70,9 @@ stages:
   - my_stage
   - aws_kube_clean
 
+aws_kube_setup:
+  extends: .aws_kube_setup
+
 job:
   stage: my_stage
   script:
@@ -68,7 +82,11 @@ job:
   dependencies:
     - aws_kube_setup
 
+aws_kube_clean:
+  extends: .aws_kube_clean
+
 include:
   project: nvidia/container-infrastructure/aws-kube-ci
   file: aws-kube-ci.yml
+  ref: vX.Y
 ```
