@@ -20,11 +20,13 @@ data "aws_ami" "ubuntu" {
 
 resource "aws_instance" "web" {
 	ami = data.aws_ami.ubuntu.id
-	
+
 	instance_type = var.instance_type
 
 	tags = {
-		Name = "${var.project_name}-${var.ci_pipeline_id}"
+		name = "${var.project_name}-${var.ci_pipeline_id}"
+		product = "cloud-native"
+		environment = "cicd"
 	}
 
 	root_block_device {
@@ -67,6 +69,12 @@ resource "aws_instance" "web" {
 resource "aws_key_pair" "sshLogin" {
 	key_name   = "${var.project_name}-key-${var.ci_pipeline_id}"
 	public_key = file("key.pub")
+
+	tags = {
+		name = "${var.project_name}-${var.ci_pipeline_id}"
+		product = "cloud-native"
+		environment = "cicd"
+	}
 }
 
 output "instance_hostname" {
