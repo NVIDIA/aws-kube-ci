@@ -24,7 +24,7 @@ resource "aws_instance" "web" {
 	instance_type = var.instance_type
 
 	tags = {
-		name = "${var.project_name}-${var.ci_pipeline_id}"
+		Name = "${var.project_name}-${var.ci_pipeline_id}"
 		product = "cloud-native"
 		environment = "cicd"
 	}
@@ -71,7 +71,6 @@ resource "aws_key_pair" "sshLogin" {
 	public_key = file("key.pub")
 
 	tags = {
-		name = "${var.project_name}-${var.ci_pipeline_id}"
 		product = "cloud-native"
 		environment = "cicd"
 	}
