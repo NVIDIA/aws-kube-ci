@@ -66,7 +66,7 @@ install_container_driver() {
 	sed -i 's/^#root/root/' /etc/nvidia-container-runtime/config.toml
 	modprobe ipmi_msghandler
 	modprobe i2c_core
-	docker run -d --privileged --pid=host -v /run/nvidia:/run/nvidia:shared nvidia/driver:418.40.04-ubuntu18.04-aws
+	docker run -d --privileged --pid=host -v /run/nvidia:/run/nvidia:shared nvidia/driver:440.64.00-ubuntu18.04-aws
 }
 
 install_nvidia_runtime() {
