@@ -16,21 +16,39 @@ before_script:
 
 aws_kube_setup:
   extends: .aws_kube_setup
+  except:
+    - schedules
+
 
 test_setup:
   stage: test_setup
+  except:
+    - schedules
   script:
     - apk add openssh-client
     - cd tests && ./test_setup.sh
 
 aws_kube_clean:
   extends: .aws_kube_clean
+  except:
+    - schedules
 
 test_cleanup:
   stage: test_cleanup
+  except:
+    - schedules
   script:
     - apk add openssh-client
     - cd tests && ./test_cleanup.sh
 
 include:
   - local: 'aws-kube-ci.yml'
+
+cleanup:
+  stage: test_cleanup
+  only:
+    - schedules
+  image: amazon/aws-cli
+  script:
+    - bash -x cleanup/run.sh
+
