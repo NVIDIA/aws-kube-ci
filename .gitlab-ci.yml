@@ -52,5 +52,6 @@ cleanup:
     name: amazon/aws-cli
     entrypoint: ["/bin/bash", "-c"]
   script:
+    - export AWS_DEFAULT_REGION="us-west-2"
     - bash -x cleanup/run.sh
 
