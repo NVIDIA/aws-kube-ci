@@ -3,7 +3,7 @@
 instances() {
 	aws ec2 describe-instances --filters "Name=tag:product,Values=cloud-native" \
 					     "Name=tag:environment,Values=cicd" \
-		--query "Reservations[].Instances[?LaunchTime>='$(date --date='-2 hours' '+%Y-%m-%dT%H:%M')'].InstanceId" \
+		--query "Reservations[].Instances[?LaunchTime<='$(date --date='-2 hours' '+%Y-%m-%dT%H:%M')'].InstanceId" \
 		--output text
 }
 
