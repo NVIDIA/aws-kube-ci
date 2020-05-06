@@ -13,5 +13,5 @@ echo "Found the following instances to cleanup: $instances"
 for instance in $instances; do
 	# Note we don't filter out terminated instances, so the above command can fail
 	echo "Deleting instance: $instance"
-	aws ec2 terminate-instance "$instance" || true
+	aws ec2 terminate-instance --instance-ids "$instance" || true
 done
