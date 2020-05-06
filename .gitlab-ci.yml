@@ -49,6 +49,7 @@ cleanup:
   only:
     - schedules
   image: amazon/aws-cli
+  entrypoint: ["/bin/bash", "-c"]
   script:
     - bash -x cleanup/run.sh
 
