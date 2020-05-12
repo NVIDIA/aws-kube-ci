@@ -26,6 +26,7 @@ resource "aws_instance" "web" {
 	tags = {
 		Name = "${var.project_name}-${var.ci_pipeline_id}"
 		product = "cloud-native"
+		project = var.project_name
 		environment = "cicd"
 	}
 
@@ -72,6 +73,7 @@ resource "aws_key_pair" "sshLogin" {
 
 	tags = {
 		product = "cloud-native"
+		project = var.project_name
 		environment = "cicd"
 	}
 }
