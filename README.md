@@ -13,7 +13,10 @@ plugin to setup the VM.
 To use this CI tool, you need to:
 
 - Place this directory at the root of your repo, with `aws-kube-ci` as name (you
-    may want to use submodules)
+    may want to use submodules). For example:
+```yaml
+git submodule add https://gitlab.com/nvidia/container-infrastructure/aws-kube-ci.git
+```
 - In your `.gitlab-ci.yml`, define the stages `aws_kube_setup` and `aws_kube_clean`
 - In your `.gitlab-ci.yml`, include the `aws-kube-ci.yml` file. It is strongly
   recommended to include a specific version. The version must be a git ref. For example:
