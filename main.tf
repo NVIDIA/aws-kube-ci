@@ -18,6 +18,25 @@ data "aws_ami" "ubuntu" {
 	owners = ["099720109477"]
 }
 
+resource "aws_security_group" "allow_ssh" {
+  name        = "allow_ssh-${var.project_name}-${var.ci_pipeline_id}"
+  description = "Allow ssh traffic on port 22 from all IP addresses"
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_instance" "web" {
 	ami = data.aws_ami.ubuntu.id
 
@@ -36,7 +55,7 @@ resource "aws_instance" "web" {
 
 	key_name = "${var.project_name}-key-${var.ci_pipeline_id}"
 
-	security_groups = ["default"]
+	security_groups = ["default", "${aws_security_group.allow_ssh.name}"]
 
 	connection {
 		host = self.public_ip
