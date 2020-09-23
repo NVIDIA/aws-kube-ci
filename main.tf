@@ -36,7 +36,7 @@ resource "aws_instance" "web" {
 
 	key_name = "${var.project_name}-key-${var.ci_pipeline_id}"
 
-	security_groups = ["default"]
+	security_groups = ["default", "allow_ssh"]
 
 	connection {
 		host = self.public_ip
