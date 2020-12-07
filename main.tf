@@ -18,6 +18,17 @@ data "aws_ami" "ubuntu" {
 	owners = ["099720109477"]
 }
 
+data "http" "gcp_cloudips" {
+	url = "https://www.gstatic.com/ipranges/cloud.json"
+	request_headers = {
+		Accept = "application/json"
+	}
+}
+
+locals {
+	ip_ranges = flatten([for o in jsondecode(data.http.gcp_cloudips.body).prefixes : (can(o.ipv4Prefix) && length(regexall("^us-east", o.scope)) > 0) ? [o.ipv4Prefix] : [] ])
+}
+
 resource "aws_security_group" "allow_ssh" {
   name        = "allow_ssh-${var.project_name}-${var.ci_pipeline_id}"
   description = "Allow ssh traffic on port 22 from all IP addresses"
@@ -26,7 +37,7 @@ resource "aws_security_group" "allow_ssh" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = local.ip_ranges
   }
 
   egress {
