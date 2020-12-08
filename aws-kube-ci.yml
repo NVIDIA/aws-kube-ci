@@ -21,6 +21,7 @@
       - aws-kube-ci/key
       - aws-kube-ci/key.pub
       - aws-kube-ci/.terraform
+      - aws-kube-ci/.terraform.lock.hcl
       - aws-kube-ci/terraform.tfstate
       - aws-kube-ci/hostname
 
