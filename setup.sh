@@ -32,6 +32,13 @@ with_retry() {
 	return 1
 }
 
+wait_cloud_init() {
+        echo "waiting 90 seconds for cloud-init to update /etc/apt/sources.list"
+
+        timeout 90 /bin/bash -c \
+                  'until stat /var/lib/cloud/instance/boot-finished 2>/dev/null; do echo waiting ...; sleep 1; done'
+}
+
 install_docker() {
 	curl https://get.docker.com | sh
 }
@@ -109,6 +116,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+wait_cloud_init
 install_docker
 usermod -a -G docker ubuntu
 docker run -d -p 5000:5000 --name registry registry:2
