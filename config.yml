@@ -3,7 +3,7 @@ kind: ClusterConfiguration
 
 apiServer:
   timeoutForControlPlane: 4m0s
-kubernetesVersion: v1.13.12
+kubernetesVersion: v1.18.16
 networking:
   podSubnet: 192.168.0.0/16
 scheduler: {}

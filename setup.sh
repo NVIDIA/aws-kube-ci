@@ -2,6 +2,11 @@
 
 set -xe
 
+KUBEADM_VERSION=1.18.16
+KUBECTL_VERSION=1.18.16
+KUBELET_VERSION=1.18.16
+K8S_CNI_VERSION=0.8.7
+CALICO_VERSION=v3.16
 
 with_retry() {
 	local max_attempts="$1"
@@ -50,7 +55,7 @@ install_kubernetes() {
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 	apt-get update
-	apt-get install -y kubeadm=1.13.12\* kubectl=1.13.12\* kubelet=1.13.12\* kubernetes-cni=0.7\*
+	apt-get install -y kubeadm=${KUBEADM_VERSION}\* kubectl=${KUBECTL_VERSION}\* kubelet=${KUBELET_VERSION}\* kubernetes-cni=${K8S_CNI_VERSION}\*
 
 	cat <<EOF >/etc/default/kubelet
 KUBELET_EXTRA_ARGS=--feature-gates=KubeletPodResources=true
@@ -61,7 +66,7 @@ EOF
 	mkdir -p /home/ubuntu/.kube
 	cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
 	chown ubuntu:ubuntu /home/ubuntu/.kube/config
-	kubectl apply -f https://docs.projectcalico.org/v3.9/manifests/calico.yaml
+	kubectl apply -f https://docs.projectcalico.org/${CALICO_VERSION}/manifests/calico.yaml
 	kubectl taint nodes --all node-role.kubernetes.io/master-
 }
 
