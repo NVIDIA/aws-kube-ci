@@ -10,6 +10,66 @@ plugin to setup the VM.
 
 ## Getting started
 
+### Creating a dev instance
+
+This repository can be used to create and configure a development instance that mirrors the configuration used in CI. Run
+```bash
+terraform init
+```
+To initialize the local terraform environment the variables for the `plan`, `apply`, and `destroy` commands are explicitly overridden.
+
+This can be done using the command line as shown below, or by creating a `.local-dev.auto.tfvars` file with ther required overrides as terraform automatically includes `*.auto.tfvars` files.
+
+Running
+```bash
+terraform plan \
+  -var "region=us-east-2" \
+  -var "key_name=elezar" \
+  -var "private_key=/Users/elezar/.ssh/elezar.pem" \
+    -var-file=local-dev.tfvars
+```
+will preview the changes that will be applied. Note this assumes that valid AWS credentials have been configured. This also assumes that an AWS key has already been created with a name `elezar` using the public key associated with the private key `/Users/elezar/.ssh/elezar.pem`.
+
+Running
+```bash
+terraform apply \
+  -auto-approve \
+  -var "region=us-east-2" \
+  -var "key_name=elezar" \
+  -var "private_key=/Users/elezar/.ssh/elezar.pem" \
+    -var-file=local-dev.tfvars
+```
+Will proceed to create the required resources.
+
+Once this is complete, the instance hostname can be obtained using:
+```bash
+export instance_hostname=$(terraform output -raw instance_hostname)
+```
+And assuming that the private key specified during creation is added to the ssh agent:
+```bash
+eval $(ssh-agent)
+ssh-add /Users/elezar/.ssh/elezar.pem
+```
+running:
+```bash
+ssh ${instance_hostname}
+```
+should connect to the created instance. Alternatively, the identity can be explicitly specified:
+```bash
+ssh -i /Users/elezar/.ssh/elezar.pem ${instance_hostname}
+```
+
+#### Cleaning up
+
+In order to remove the created resources, run:
+```bash
+terraform destroy \
+  -auto-approve \
+  -var "region=us-east-2" \
+    -var-file=local-dev.tfvars
+```
+
+### Using the CI tool
 To use this CI tool, you need to:
 
 - Place this directory at the root of your repo, with `aws-kube-ci` as name (you

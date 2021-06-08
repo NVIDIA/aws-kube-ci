@@ -1,5 +1,5 @@
 provider "aws" {
-	region = "us-west-2"
+	region = var.region
 }
 
 data "aws_ami" "ubuntu" {
@@ -26,12 +26,20 @@ data "http" "gcp_cloudips" {
 }
 
 locals {
-	ip_ranges = flatten([for o in jsondecode(data.http.gcp_cloudips.body).prefixes : (can(o.ipv4Prefix) && length(regexall("^us-east", o.scope)) > 0) ? [o.ipv4Prefix] : [] ])
+	ip_ranges = length(var.ingress_ip_ranges) > 0 ? var.ingress_ip_ranges : flatten([for o in jsondecode(data.http.gcp_cloudips.body).prefixes : (can(o.ipv4Prefix) && length(regexall("^us-east", o.scope)) > 0) ? [o.ipv4Prefix] : [] ])
+	key_name = var.key_name == "" ? "${var.project_name}-key-${var.ci_pipeline_id}" : var.key_name
+	// define common tags
+	common_tags = {
+		Name = var.environment == "cicd" ? "${var.project_name}-${var.ci_pipeline_id}" : "dev"
+		product = "cloud-native"
+		project = var.project_name
+		environment = var.environment
+	}
 }
 
 resource "aws_security_group" "allow_ssh" {
   name        = "allow_ssh-${var.project_name}-${var.ci_pipeline_id}"
-  description = "Allow ssh traffic on port 22 from all IP addresses"
+  description = "Allow ssh traffic on port 22 from the specified IP addresses"
 
   ingress {
     from_port   = 22
@@ -49,7 +57,7 @@ resource "aws_security_group" "allow_ssh" {
 }
 
 resource "aws_instance" "web" {
-	ami = data.aws_ami.ubuntu.id
+	ami = var.ami == "" ? data.aws_ami.ubuntu.id : var.ami
 
 	instance_type = var.instance_type
 
@@ -64,7 +72,7 @@ resource "aws_instance" "web" {
 		volume_size = 80
 	}
 
-	key_name = "${var.project_name}-key-${var.ci_pipeline_id}"
+	key_name = local.key_name
 
 	security_groups = ["default", aws_security_group.allow_ssh.name]
 
@@ -72,7 +80,7 @@ resource "aws_instance" "web" {
 		host = self.public_ip
 		type = "ssh"
 		user = "ubuntu"
-		private_key = file("key")
+		private_key = file(var.private_key)
 		agent = false
 		timeout = "3m"
 	}
@@ -98,16 +106,19 @@ resource "aws_instance" "web" {
 }
 
 resource "aws_key_pair" "sshLogin" {
-	key_name   = "${var.project_name}-key-${var.ci_pipeline_id}"
-	public_key = file("key.pub")
+	// If the public key is supplied, then create the aws_key_pair with the specified name.
+	count = var.public_key == "" ? 0 : 1
+	public_key = file(var.public_key)
 
-	tags = {
-		product = "cloud-native"
-		project = var.project_name
-		environment = "cicd"
-	}
+	key_name = local.key_name
+
+	tags = local.common_tags
 }
 
 output "instance_hostname" {
 	value = "ubuntu@${aws_instance.web.public_dns}"
+}
+
+output "private_key" {
+	value = var.private_key
 }
