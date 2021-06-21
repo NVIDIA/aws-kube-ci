@@ -86,8 +86,8 @@ resource "aws_instance" "web" {
 	}
 
 	provisioner "file" {
-		source = "daemon.json"
-		destination = "~/daemon.json"
+		source = "config"
+		destination = "~/config"
 	}
 
 	provisioner "file" {
@@ -101,7 +101,7 @@ resource "aws_instance" "web" {
 	}
 
 	provisioner "remote-exec" {
-		inline = ["cd ~ && chmod +x ./setup.sh && sudo ./setup.sh ${var.setup_params}"]
+		inline = ["cd ~/config && chmod +x ./setup.sh && sudo ./setup.sh ${var.setup_params}"]
 	}
 }
 
