@@ -2,40 +2,9 @@
 
 set -xe
 
-KUBEADM_VERSION=1.18.16
-KUBECTL_VERSION=1.18.16
-KUBELET_VERSION=1.18.16
-K8S_CNI_VERSION=0.8.7
-CALICO_VERSION=v3.16
+CONFIG_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-with_retry() {
-	local max_attempts="$1"
-	local delay="$2"
-	local count=0
-	local rc
-	shift 2
-
-	while true; do
-		set +e
-		"$@"
-		rc="$?"
-		set -e
-
-		count="$((count+1))"
-
-		if [[ "${rc}" -eq 0 ]]; then
-			return 0
-		fi
-
-		if [[ "${max_attempts}" -le 0 ]] || [[ "${count}" -lt "${max_attempts}" ]]; then
-			sleep "${delay}"
-		else
-			break
-		fi
-	done
-
-	return 1
-}
+source ${CONFIG_DIR}/common.sh
 
 wait_cloud_init() {
         echo "waiting 90 seconds for cloud-init to update /etc/apt/sources.list"
@@ -45,29 +14,11 @@ wait_cloud_init() {
 }
 
 install_docker() {
-	curl https://get.docker.com | sh
+	${CONFIG_DIR}/install_docker.sh
 }
 
 install_kubernetes() {
-	apt-get update && apt-get install -y apt-transport-https curl
-	curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-	cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
-deb https://apt.kubernetes.io/ kubernetes-xenial main
-EOF
-	apt-get update
-	apt-get install -y kubeadm=${KUBEADM_VERSION}\* kubectl=${KUBECTL_VERSION}\* kubelet=${KUBELET_VERSION}\* kubernetes-cni=${K8S_CNI_VERSION}\*
-
-	cat <<EOF >/etc/default/kubelet
-KUBELET_EXTRA_ARGS=--feature-gates=KubeletPodResources=true
-EOF
-
-	with_retry 2 5s kubeadm init --config ./config.yml --ignore-preflight-errors=all
-
-	mkdir -p /home/ubuntu/.kube
-	cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
-	chown ubuntu:ubuntu /home/ubuntu/.kube/config
-	kubectl apply -f https://docs.projectcalico.org/${CALICO_VERSION}/manifests/calico.yaml
-	kubectl taint nodes --all node-role.kubernetes.io/master-
+	${CONFIG_DIR}/install_kubernetes.sh
 }
 
 install_container_driver() {
@@ -87,7 +38,7 @@ install_nvidia_runtime() {
 		tee /etc/apt/sources.list.d/nvidia-docker.list
 	apt-get update
 	apt-get install -y nvidia-docker2
-	cp daemon.json /etc/docker/daemon.json
+	cp ${CONFIG_DIR}/daemon.json /etc/docker/daemon.json
 	pkill -SIGHUP dockerd
 }
 
@@ -123,7 +74,6 @@ done
 
 wait_cloud_init
 install_docker
-usermod -a -G docker ubuntu
 docker run -d -p 5000:5000 --name registry registry:2
 install_kubernetes
 

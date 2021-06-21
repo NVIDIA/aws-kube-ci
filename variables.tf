@@ -58,3 +58,15 @@ variable "ami" {
 	type = string
 	default = ""
 }
+
+variable "container_runtime" {
+	type = string
+	description = "The container runtime to use. [docker | containerd]"
+	default = "docker"
+}
+
+variable "legacy_setup" {
+	type = bool
+	description = "Use the legacy setup mechanism when launching a node"
+	default = true
+}
