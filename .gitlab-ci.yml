@@ -13,6 +13,7 @@ stages:
 before_script:
   - mkdir -p aws-kube-ci
   - cp * aws-kube-ci/ || true
+  - cp -R config aws-kube-ci/config
 
 aws_kube_setup:
   extends: .aws_kube_setup

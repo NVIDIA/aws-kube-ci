@@ -69,6 +69,11 @@ terraform destroy \
     -var-file=local-dev.tfvars
 ```
 
+#### Specifying the container runtime
+
+By using the `container_runtime` variable the provisioned node can be set up to run either docker or
+containerd as the container runtime. The default is `docker` and can be changed using the `-var "legacy_setup=false" -var "container_runtime=containerd"` command line arguments when running `terraform apply` (or `destroy`).
+
 ### Using the CI tool
 To use this CI tool, you need to:
 

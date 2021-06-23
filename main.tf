@@ -35,6 +35,7 @@ locals {
 		project = var.project_name
 		environment = var.environment
 	}
+	config_root = "~/config"
 }
 
 resource "aws_security_group" "allow_ssh" {
@@ -77,7 +78,29 @@ resource "aws_instance" "web" {
 	security_groups = ["default", aws_security_group.allow_ssh.name]
 
 	connection {
-		host = self.public_ip
+		host = aws_instance.web.public_ip
+		type = "ssh"
+		user = "ubuntu"
+		private_key = file(var.private_key)
+		agent = false
+		timeout = "3m"
+	}
+
+	// We wait 90 seconds for the instance to complete boot before being ready
+	provisioner "remote-exec" {
+		inline = [
+			"timeout 90 bash -c 'until [ -e /var/lib/cloud/instance/boot-finished ]; do sleep 5; done'",
+		]
+	}
+}
+
+resource "null_resource" "copy_config" {
+	triggers = {
+	    instance_id = aws_instance.web.id
+	}
+
+	connection {
+		host = aws_instance.web.public_ip
 		type = "ssh"
 		user = "ubuntu"
 		private_key = file(var.private_key)
@@ -86,23 +109,77 @@ resource "aws_instance" "web" {
 	}
 
 	provisioner "file" {
-		source = "daemon.json"
-		destination = "~/daemon.json"
-	}
-
-	provisioner "file" {
-		source = "setup.sh"
-		destination = "~/setup.sh"
-	}
-
-	provisioner "file" {
-		source = "config.yml"
-		destination = "~/config.yml"
+		source = "config"
+		destination = local.config_root
 	}
 
 	provisioner "remote-exec" {
-		inline = ["cd ~ && chmod +x ./setup.sh && sudo ./setup.sh ${var.setup_params}"]
+		inline = ["chmod +x ${local.config_root}/*.sh"]
 	}
+}
+
+resource "null_resource" "install_runtime" {
+	count = !var.legacy_setup ? 1 : 0
+
+	connection {
+		host = aws_instance.web.public_ip
+		type = "ssh"
+		user = "ubuntu"
+		private_key = file(var.private_key)
+		agent = false
+		timeout = "3m"
+	}
+
+	provisioner "remote-exec" {
+		inline = ["sudo ${local.config_root}/install_${var.container_runtime}.sh"]
+	}
+
+	depends_on = [
+		null_resource.copy_config
+	]
+}
+
+
+resource "null_resource" "install_kubernetes" {
+	count = !var.legacy_setup ? 1 : 0
+
+	connection {
+		host = aws_instance.web.public_ip
+		type = "ssh"
+		user = "ubuntu"
+		private_key = file(var.private_key)
+		agent = false
+		timeout = "3m"
+	}
+
+	provisioner "remote-exec" {
+		inline = ["sudo CONTAINER_RUNTIME=${var.container_runtime} ${local.config_root}/install_kubernetes.sh"]
+	}
+
+	depends_on = [
+		null_resource.install_runtime
+	]
+}
+
+resource "null_resource" "legacy_setup" {
+	count = var.legacy_setup ? 1 : 0
+
+	connection {
+		host = aws_instance.web.public_ip
+		type = "ssh"
+		user = "ubuntu"
+		private_key = file(var.private_key)
+		agent = false
+		timeout = "3m"
+	}
+
+	provisioner "remote-exec" {
+		inline = ["sudo ${local.config_root}/setup.sh ${var.setup_params}"]
+	}
+
+	depends_on = [
+		null_resource.copy_config
+	]
 }
 
 resource "aws_key_pair" "sshLogin" {
@@ -121,4 +198,8 @@ output "instance_hostname" {
 
 output "private_key" {
 	value = var.private_key
+}
+
+output "container_runtime" {
+	value = var.container_runtime
 }
