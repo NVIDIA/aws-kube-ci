@@ -54,6 +54,12 @@ variable "ingress_ip_ranges" {
 	default = []
 }
 
+variable "additional_ingress_ip_ranges" {
+	type = list(string)
+	description = "CIDR blocks to always append to the CIDR list"
+	default = []
+}
+
 variable "ami" {
 	type = string
 	default = ""
