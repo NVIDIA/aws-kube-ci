@@ -6,6 +6,7 @@ variable "region" {
 variable "project_name" {
 	type = string
 	description = "Name of the project"
+	default = "development"
 }
 
 variable "ci_pipeline_id" {
