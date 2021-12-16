@@ -35,7 +35,7 @@ locals {
 		project = var.project_name
 		environment = var.environment
 	}
-	config_root = "~/config"
+	config_root = "/home/ubuntu/config"
 }
 
 resource "aws_security_group" "allow_ssh" {
