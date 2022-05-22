@@ -26,7 +26,10 @@ data "http" "gcp_cloudips" {
 }
 
 locals {
+	// get complete list of ip_ranges and split into multiple buckets if the number of ip_ranges exceeds the security group rule limit
 	ip_ranges = length(var.ingress_ip_ranges) > 0 ? var.ingress_ip_ranges : flatten([for o in jsondecode(data.http.gcp_cloudips.body).prefixes : (can(o.ipv4Prefix) && length(regexall("^us-east", o.scope)) > 0) ? [o.ipv4Prefix] : [] ])
+	ip_ranges_chunks = chunklist(concat(local.ip_ranges, var.additional_ingress_ip_ranges), var.max_ingress_rules)
+	ip_ranges_chunks_map = { for i in range(length(local.ip_ranges_chunks)): i => local.ip_ranges_chunks[i] }
 	key_name = var.key_name == "" ? "${var.project_name}-key-${var.ci_pipeline_id}" : var.key_name
 	// define common tags
 	common_tags = {
@@ -39,14 +42,15 @@ locals {
 }
 
 resource "aws_security_group" "allow_ssh" {
-  name        = "allow_ssh-${var.project_name}-${var.ci_pipeline_id}"
+  for_each    = local.ip_ranges_chunks_map
+  name        = "allow_ssh-${var.project_name}-${each.key}-${var.ci_pipeline_id}"
   description = "Allow ssh traffic on port 22 from the specified IP addresses"
 
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = concat(local.ip_ranges, var.additional_ingress_ip_ranges)
+    cidr_blocks = each.value
   }
 
   egress {
@@ -75,7 +79,7 @@ resource "aws_instance" "web" {
 
 	key_name = local.key_name
 
-	security_groups = ["default", aws_security_group.allow_ssh.name]
+	security_groups = concat(["default"], [for allow_ssh_sg in aws_security_group.allow_ssh : allow_ssh_sg.name ])
 
 	connection {
 		host = aws_instance.web.public_ip
