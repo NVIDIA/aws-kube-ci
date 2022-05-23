@@ -49,6 +49,12 @@ variable "private_key" {
   default = "key"
 }
 
+variable "max_ingress_rules" {
+  type = number
+  description = "The maximum number of ingress rules per security group"
+  default = 60
+}
+
 variable "ingress_ip_ranges" {
 	type = list(string)
 	description = "The CIDR blocks to allow SSH access from"
