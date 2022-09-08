@@ -18,6 +18,16 @@ data "aws_ami" "ubuntu" {
 	owners = ["099720109477"]
 }
 
+# Find availability zones where the ec2 instance type is available
+data "aws_ec2_instance_type_offerings" "available" {
+  filter {
+    name   = "instance-type"
+    values = [var.instance_type]
+  }
+
+  location_type = "availability-zone"
+}
+
 data "http" "gcp_cloudips" {
 	url = "https://www.gstatic.com/ipranges/cloud.json"
 	request_headers = {
@@ -65,6 +75,7 @@ resource "aws_default_route_table" "rt" {
 resource "aws_subnet" "subnet" {
   vpc_id            = aws_vpc.vpc.id
   cidr_block        = "10.0.0.0/24"
+  availability_zone = element(data.aws_ec2_instance_type_offerings.available.locations, 0)
   tags = local.common_tags
 }
 
