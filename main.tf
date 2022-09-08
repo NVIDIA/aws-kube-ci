@@ -18,6 +18,16 @@ data "aws_ami" "ubuntu" {
 	owners = ["099720109477"]
 }
 
+# Find availability zones where the ec2 instance type is available
+data "aws_ec2_instance_type_offerings" "available" {
+  filter {
+    name   = "instance-type"
+    values = [var.instance_type]
+  }
+
+  location_type = "availability-zone"
+}
+
 data "http" "gcp_cloudips" {
 	url = "https://www.gstatic.com/ipranges/cloud.json"
 	request_headers = {
@@ -41,10 +51,41 @@ locals {
 	config_root = "/home/ubuntu/config"
 }
 
+resource "aws_vpc" "vpc" {
+  cidr_block = "10.0.0.0/16"
+  enable_dns_hostnames = true
+  tags = local.common_tags
+}
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = aws_vpc.vpc.id
+  tags = local.common_tags
+}
+
+resource "aws_default_route_table" "rt" {
+  default_route_table_id = aws_vpc.vpc.default_route_table_id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.gw.id
+  }
+
+  tags = local.common_tags
+}
+
+resource "aws_subnet" "subnet" {
+  vpc_id            = aws_vpc.vpc.id
+  cidr_block        = "10.0.0.0/24"
+  availability_zone = element(data.aws_ec2_instance_type_offerings.available.locations, 0)
+  tags = local.common_tags
+}
+
 resource "aws_security_group" "allow_ssh" {
   for_each    = local.ip_ranges_chunks_map
   name        = "allow_ssh-${var.project_name}-${each.key}-${var.ci_pipeline_id}"
   description = "Allow ssh traffic on port 22 from the specified IP addresses"
+
+  vpc_id = aws_vpc.vpc.id
 
   ingress {
     from_port   = 22
@@ -73,13 +114,18 @@ resource "aws_instance" "web" {
 		environment = "cicd"
 	}
 
+	associate_public_ip_address = true
+	subnet_id = aws_subnet.subnet.id
+
 	root_block_device {
 		volume_size = 80
 	}
 
 	key_name = local.key_name
 
-	security_groups = concat(["default"], [for allow_ssh_sg in aws_security_group.allow_ssh : allow_ssh_sg.name ])
+	vpc_security_group_ids = concat([aws_vpc.vpc.default_security_group_id], [for allow_ssh_sg in aws_security_group.allow_ssh : allow_ssh_sg.id ])
+
+	depends_on = [aws_internet_gateway.gw]
 
 	connection {
 		host = aws_instance.web.public_ip
