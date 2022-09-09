@@ -78,6 +78,12 @@ variable "container_runtime" {
 	default = "docker"
 }
 
+variable "kubernetes_version" {
+	type = string
+	description = "The version of kubernetes to install"
+	default = "1.23.10"
+}
+
 variable "legacy_setup" {
 	type = bool
 	description = "Use the legacy setup mechanism when launching a node"
