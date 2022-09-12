@@ -203,7 +203,7 @@ resource "null_resource" "install_kubernetes" {
 	}
 
 	provisioner "remote-exec" {
-		inline = ["sudo CONTAINER_RUNTIME=${var.container_runtime} ${local.config_root}/install_kubernetes.sh"]
+		inline = ["sudo CONTAINER_RUNTIME=${var.container_runtime} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/install_kubernetes.sh"]
 	}
 
 	depends_on = [
@@ -224,7 +224,7 @@ resource "null_resource" "legacy_setup" {
 	}
 
 	provisioner "remote-exec" {
-		inline = ["sudo ${local.config_root}/setup.sh ${var.setup_params}"]
+		inline = ["sudo CONTAINER_RUNTIME=${var.container_runtime} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/setup.sh ${var.setup_params}"]
 	}
 
 	depends_on = [
@@ -253,3 +253,8 @@ output "private_key" {
 output "container_runtime" {
 	value = var.container_runtime
 }
+
+output "kubernetes_version" {
+	value = var.kubernetes_version
+}
+
