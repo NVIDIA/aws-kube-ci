@@ -13,14 +13,17 @@ plugin to setup the VM.
 ### Creating a dev instance
 
 This repository can be used to create and configure a development instance that mirrors the configuration used in CI. Run
+
 ```bash
 terraform init
 ```
+
 To initialize the local terraform environment the variables for the `plan`, `apply`, and `destroy` commands are explicitly overridden.
 
 This can be done using the command line as shown below, or by creating a `.local-dev.auto.tfvars` file with ther required overrides as terraform automatically includes `*.auto.tfvars` files.
 
-Running
+If running outside of the corp VPN, you need to add your IP to the list `ingress_ip_ranges` at the `local-dev.tfvars` file first then, Run `plan` to check that everything is ready:
+
 ```bash
 terraform plan \
   -var "region=us-east-2" \
@@ -28,9 +31,8 @@ terraform plan \
   -var "private_key=/Users/elezar/.ssh/elezar.pem" \
     -var-file=local-dev.tfvars
 ```
-will preview the changes that will be applied. Note this assumes that valid AWS credentials have been configured. This also assumes that an AWS key has already been created with a name `elezar` using the public key associated with the private key `/Users/elezar/.ssh/elezar.pem`.
+will preview the changes that will be applied. Note this assumes that valid AWS credentials have been configured. This also assumes that an AWS key has already been created with a name `elezar` using the public key associated with the private key `/Users/elezar/.ssh/elezar.pem`, so please change accordingly, then create the instance by running `apply`:
 
-Running
 ```bash
 terraform apply \
   -auto-approve \
@@ -42,26 +44,46 @@ terraform apply \
 Will proceed to create the required resources.
 
 Once this is complete, the instance hostname can be obtained using:
+
 ```bash
 export instance_hostname=$(terraform output -raw instance_hostname)
 ```
 And assuming that the private key specified during creation is added to the ssh agent:
+
 ```bash
 eval $(ssh-agent)
 ssh-add /Users/elezar/.ssh/elezar.pem
 ```
+
 running:
+
 ```bash
 ssh ${instance_hostname}
 ```
+
 should connect to the created instance. Alternatively, the identity can be explicitly specified:
+
 ```bash
 ssh -i /Users/elezar/.ssh/elezar.pem ${instance_hostname}
+```
+
+To start using the Kubernetes cluster first we retrieve the Kubeconfig file:
+
+```bash
+scp ${instance_hostname}:/home/ubuntu/.kube kubeconfig
+```
+
+Now we can use the kubernetes clusters from our host:
+
+```bash
+kubectl --kubeconfig kubeconfig get node
+ip-10-0-0-14   Ready    control-plane,master   7m51s   v1.23.10
 ```
 
 #### Cleaning up
 
 In order to remove the created resources, run:
+
 ```bash
 terraform destroy \
   -auto-approve \
@@ -79,20 +101,25 @@ To use this CI tool, you need to:
 
 - Place this directory at the root of your repo, with `aws-kube-ci` as name (you
     may want to use submodules). For example:
+
 ```yaml
 git submodule add https://gitlab.com/nvidia/container-infrastructure/aws-kube-ci.git
 ```
+
 - In your `.gitlab-ci.yml`, define the stages `aws_kube_setup` and `aws_kube_clean`
 - In your `.gitlab-ci.yml`, include the `aws-kube-ci.yml` file. It is strongly
   recommended to include a specific version. The version must be a git ref. For example:
+
 ```yaml
 include:
   project: nvidia/container-infrastructure/aws-kube-ci
   file: aws-kube-ci.yml
   ref: vX.Y
 ```
+
 - In your `.gitlab-ci.yml`, extends the `.aws_kube_setup` and `.aws_kube_clean`
   jobs. For example:
+
 ```yaml
 aws_kube_setup:
   extends: .aws_kube_setup
@@ -108,6 +135,7 @@ _Note that we include project rather than file here because gitlab doesn't suppo
   - `project_name`: The name of your project
 
 For example:
+
 ```
 instance_type = "g2.2xlarge"
 project_name = "my-project"
@@ -128,6 +156,7 @@ using `127.0.0.1:5000`. It could be useful if you need to build a local image
 and use it in the Kubernetes cluster.
 
 A simple `.gitlab-ci.yml` could be:
+
 ```yaml
 variables:
   GIT_SUBMODULE_STRATEGY: recursive

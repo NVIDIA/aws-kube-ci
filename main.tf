@@ -102,6 +102,42 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
+resource "aws_security_group" "allow_k8s_control_plane" {
+  for_each    = local.ip_ranges_chunks_map
+  name        = "allow_k8s_control_plane-${var.project_name}-${each.key}-${var.ci_pipeline_id}"
+  description = "Allow Kubernetes"
+  vpc_id = aws_vpc.vpc.id
+
+  ingress {
+	description = "Secure K8S API"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "tcp"
+    cidr_blocks      = each.value
+  }
+
+  ingress {
+	description = "K8S API"
+    from_port        = 6443
+    to_port          = 6443
+    protocol         = "tcp"
+    cidr_blocks      = each.value
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "Control Plane Load Balancer"
+	KubernetesCluster = "${var.project_name}"
+  }
+}
+
 resource "aws_instance" "web" {
 	ami = var.ami == "" ? data.aws_ami.ubuntu.id : var.ami
 
@@ -123,7 +159,9 @@ resource "aws_instance" "web" {
 
 	key_name = local.key_name
 
-	vpc_security_group_ids = concat([aws_vpc.vpc.default_security_group_id], [for allow_ssh_sg in aws_security_group.allow_ssh : allow_ssh_sg.id ])
+	vpc_security_group_ids = concat([aws_vpc.vpc.default_security_group_id], 
+		[for allow_ssh_sg in aws_security_group.allow_ssh : allow_ssh_sg.id ],
+		[for allow_k8s_sg in aws_security_group.allow_k8s_control_plane : allow_k8s_sg.id ])
 
 	depends_on = [aws_internet_gateway.gw]
 
@@ -201,9 +239,9 @@ resource "null_resource" "install_kubernetes" {
 		agent = false
 		timeout = "3m"
 	}
-
+  	
 	provisioner "remote-exec" {
-		inline = ["sudo CONTAINER_RUNTIME=${var.container_runtime} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/install_kubernetes.sh"]
+		inline = ["sudo K8S_ENDPOINT_HOST=${aws_instance.web.public_dns} CONTAINER_RUNTIME=${var.container_runtime} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/install_kubernetes.sh"]
 	}
 
 	depends_on = [
@@ -224,7 +262,7 @@ resource "null_resource" "legacy_setup" {
 	}
 
 	provisioner "remote-exec" {
-		inline = ["sudo CONTAINER_RUNTIME=${var.container_runtime} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/setup.sh ${var.setup_params}"]
+		inline = ["sudo K8S_ENDPOINT_HOST=${aws_instance.web.public_dns} CONTAINER_RUNTIME=${var.container_runtime} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/setup.sh ${var.setup_params}"]
 	}
 
 	depends_on = [
@@ -257,4 +295,3 @@ output "container_runtime" {
 output "kubernetes_version" {
 	value = var.kubernetes_version
 }
-
