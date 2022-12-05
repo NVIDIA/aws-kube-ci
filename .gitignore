@@ -2,3 +2,7 @@
 .terraform/
 key
 key.pub
+kubeconfig
+terraform.tfstate
+terraform.tfstate.backup
+

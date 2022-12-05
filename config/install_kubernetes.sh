@@ -22,7 +22,7 @@ cat <<EOF >/etc/default/kubelet
 KUBELET_EXTRA_ARGS=--feature-gates=KubeletPodResources=true
 EOF
 
-KUBEADM_OPTIONS="--pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all"
+KUBEADM_OPTIONS="--pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all --control-plane-endpoint=${K8S_ENDPOINT_HOST:?K8S_ENDPOINT_HOST must be set}:6443" 
 
 if [[ x"${CONTAINER_RUNTIME}" == x"containerd" ]]; then
 # Configure k8s to use containerd
