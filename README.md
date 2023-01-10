@@ -70,7 +70,7 @@ ssh -i /Users/elezar/.ssh/elezar.pem ${instance_hostname}
 To start using the Kubernetes cluster first we retrieve the Kubeconfig file:
 
 ```bash
-scp ${instance_hostname}:/home/ubuntu/.kube kubeconfig
+scp -i /Users/elezar/.ssh/elezar.pem ${instance_hostname}:/home/ubuntu/.kube/config kubeconfig
 ```
 
 Now we can use the kubernetes clusters from our host:
