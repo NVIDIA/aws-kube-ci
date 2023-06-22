@@ -43,7 +43,7 @@ install_nvidia_runtime() {
 }
 
 install_k8s_device_plugin() {
-	kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.9.0/nvidia-device-plugin.yml
+	KUBECONFIG=/home/ubuntu/.kube/config kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/v0.9.0/nvidia-device-plugin.yml
 }
 
 usage() {

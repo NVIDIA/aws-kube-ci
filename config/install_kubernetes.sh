@@ -55,5 +55,6 @@ with_retry 2 5s kubeadm init ${KUBEADM_OPTIONS}
 mkdir -p /home/ubuntu/.kube
 cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
 chown ubuntu:ubuntu /home/ubuntu/.kube/config
+export KUBECONFIG=/home/ubuntu/.kube/config
 kubectl apply -f https://docs.projectcalico.org/${CALICO_VERSION}/manifests/calico.yaml
 kubectl taint nodes --all node-role.kubernetes.io/master-
