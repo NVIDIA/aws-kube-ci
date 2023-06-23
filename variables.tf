@@ -1,6 +1,16 @@
 variable "region" {
   type = string
-  default = "us-west-2"
+  default = "us-east-2"
+}
+
+variable "image_name" {
+  type = string
+  default = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+}
+
+variable "ami" {
+  type = string
+  default = ""
 }
 
 variable "project_name" {
