@@ -12,24 +12,24 @@ source ${CONFIG_DIR}/common.sh
 : ${CRICTL_VERSION:=v1.25.0}
 
 # Configure persistent loading of modules
-sudo tee /etc/modules-load.d/k8s.conf <<EOF
+tee /etc/modules-load.d/k8s.conf <<EOF
 overlay
 br_netfilter
 EOF
 
 # Ensure you load modules
-sudo modprobe overlay
-sudo modprobe br_netfilter
+modprobe overlay
+modprobe br_netfilter
 
 # Set up required sysctl params
-sudo tee /etc/sysctl.d/kubernetes.conf<<EOF
+tee /etc/sysctl.d/kubernetes.conf<<EOF
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
 net.ipv4.ip_forward = 1
 EOF
 
 # Reload sysctl
-sudo sysctl --system
+sysctl --system
 
 # Install CNI plugins (required for most pod network):
 DEST="/opt/cni/bin"
@@ -72,6 +72,7 @@ chown ubuntu:ubuntu /home/ubuntu/.kube/config
 export KUBECONFIG="/home/ubuntu/.kube/config"
 
 # give it room for all the pods and control plane components to start
+apt install -y jq
 sleep 5
 
 # Install Calico

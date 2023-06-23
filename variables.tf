@@ -77,7 +77,7 @@ variable "additional_ingress_ip_ranges" {
 	default = []
 }
 
-variable "kubernetes" {
+variable "kubernetes_enabled" {
 	type = bool
 	description = "install kubernetes components"
 	default = true
