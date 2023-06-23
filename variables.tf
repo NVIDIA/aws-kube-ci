@@ -28,7 +28,7 @@ variable "ci_pipeline_id" {
 variable "instance_type" {
 	type = string
 	description = "Type of instance"
-	default = "p2.xlarge"
+	default = "g4dn.xlarge"
 }
 
 variable "environment" {
