@@ -240,7 +240,7 @@ resource "null_resource" "install_kubernetes" {
 	}
   	
 	provisioner "remote-exec" {
-		inline = ["sudo K8S_ENDPOINT_HOST=${aws_instance.web.public_dns} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/install_kubernetes.sh"]
+		inline = ["sudo K8S_FEATURE_GATES=${kubernetes_features} K8S_ENDPOINT_HOST=${aws_instance.web.public_dns} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/install_kubernetes.sh"]
 	}
 
 	depends_on = [

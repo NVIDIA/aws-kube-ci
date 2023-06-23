@@ -83,6 +83,12 @@ variable "kubernetes" {
 	default = true
 }
 
+variable "kubernetes_features" {
+	type = string
+	description = "The kubernetes features to enable"
+	default = ""
+}
+
 variable "container_runtime" {
 	type = string
 	description = "The container runtime and it's version to use [containerd | crio | docker ]"

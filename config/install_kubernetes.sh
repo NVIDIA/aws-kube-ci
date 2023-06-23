@@ -60,7 +60,12 @@ curl -LO https://dl.k8s.io/release/${K8S_VERSION}/bin/linux/amd64/kubectl
 chmod +x kubectl
 
 # Start kubernetes
-with_retry 2 5s kubeadm init --pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all --control-plane-endpoint=${K8S_ENDPOINT_HOST:?K8S_ENDPOINT_HOST must be set}:6443
+KUBEADMIN_OPTIONS="--pod-network-cidr=192.168.0.0/16 --ignore-preflight-errors=all --control-plane-endpoint=${K8S_ENDPOINT_HOST:?K8S_ENDPOINT_HOST must be set}:6443"
+# If K8S_FEATURE_GATES is set and not empty, add it to the kubeadm init options
+if [ -n "${K8S_FEATURE_GATES}" ]; then
+  KUBEADMIN_OPTIONS="${KUBEADMIN_OPTIONS} --feature-gates=${K8S_FEATURE_GATES}"
+fi
+with_retry 2 5s kubeadm init ${KUBEADMIN_OPTIONS} 
 mkdir -p /home/ubuntu/.kube
 cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
 chown ubuntu:ubuntu /home/ubuntu/.kube/config
