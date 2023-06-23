@@ -218,7 +218,7 @@ resource "null_resource" "install_runtime" {
 	}
 
 	provisioner "remote-exec" {
-		inline = ["sudo ${local.config_root}/install_${var.container_runtime}.sh"]
+		inline = ["sudo CONTAINER_RUNTIME=${var.container_runtime} ${local.config_root}/install_container_runtime.sh"]
 	}
 
 	depends_on = [
@@ -240,7 +240,7 @@ resource "null_resource" "install_kubernetes" {
 	}
   	
 	provisioner "remote-exec" {
-		inline = ["sudo K8S_ENDPOINT_HOST=${aws_instance.web.public_dns} CONTAINER_RUNTIME=${var.container_runtime} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/install_kubernetes.sh"]
+		inline = ["sudo K8S_ENDPOINT_HOST=${aws_instance.web.public_dns} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/install_kubernetes.sh"]
 	}
 
 	depends_on = [
