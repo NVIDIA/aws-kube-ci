@@ -85,8 +85,8 @@ variable "kubernetes" {
 
 variable "container_runtime" {
 	type = string
-	description = "The container runtime to use. [docker | containerd]"
-	default = "docker"
+	description = "The container runtime and it's version to use [containerd@1.6.21 | crio@1.26 | docker@latest ]"
+	default = "containerd@1.6.21"
 }
 
 variable "kubernetes_version" {
