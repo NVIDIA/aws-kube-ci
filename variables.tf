@@ -85,8 +85,26 @@ variable "kubernetes" {
 
 variable "container_runtime" {
 	type = string
-	description = "The container runtime and it's version to use [containerd@1.6.21 | crio@1.26 | docker@latest ]"
-	default = "containerd@1.6.21"
+	description = "The container runtime and it's version to use [containerd | crio | docker ]"
+	default = "containerd"
+}
+
+variable "containerd_version" {
+	type = string
+	description = "The version of containerd to install"
+	default = "1.6.21"
+}
+
+variable "docker_version" {
+	type = string
+	description = "The version of docker to install"
+	default = "latest"
+}
+
+variable "crio_version" {
+	type = string
+	description = "The version of crio to install"
+	default = "1.26"
 }
 
 variable "kubernetes_version" {

@@ -4,10 +4,7 @@ set -xe
 source ${CONFIG_DIR}/common.sh
 
 # Based on https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
-# If first argument is not equal to latest, then use it as version
-if [ "$1" != "latest" ]; then
-  DOCKER_VERSION=$1
-fi
+: ${DOCKER_VERSION:=latest}
 
 # Add repo and Install packages
 apt update

@@ -3,8 +3,7 @@ set -xe
 
 source ${CONFIG_DIR}/common.sh
 
-# take RUNTIME_VERSION as first argument or default to v1.6 if not provided
-RUNTIME_VERSION=${1:-v1.6}
+: ${CRIO_VERSION:=v1.6}
 
 # Add Cri-o repo
 echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/ /" > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list

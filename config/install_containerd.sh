@@ -5,8 +5,7 @@ CONFIG_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source ${CONFIG_DIR}/common.sh
 
-# take RUNTIME_VERSION as first argument or default to v1.6.21 if not provided
-RUNTIME_VERSION=${1:-1.6.21}
+: ${CONTAINERD_VERSION:=1.6.21}
 
 # Install required packages
 apt update
@@ -18,7 +17,7 @@ add-apt-repository "deb [arch=${ARCH}] https://download.docker.com/linux/ubuntu 
 
 # Install containerd
 apt update
-apt install -y containerd.io=${RUNTIME_VERSION}-1
+apt install -y containerd.io=${CONTAINERD_VERSION}-1
 
 # Configure containerd and start service
 mkdir -p /etc/containerd
