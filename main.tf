@@ -207,7 +207,6 @@ resource "null_resource" "copy_config" {
 }
 
 resource "null_resource" "install_runtime" {
-	count = !var.legacy_setup ? 1 : 0
 
 	connection {
 		host = aws_instance.web.public_ip
@@ -246,27 +245,6 @@ resource "null_resource" "install_kubernetes" {
 
 	depends_on = [
 		null_resource.install_runtime
-	]
-}
-
-resource "null_resource" "legacy_setup" {
-	count = var.legacy_setup ? 1 : 0
-
-	connection {
-		host = aws_instance.web.public_ip
-		type = "ssh"
-		user = "ubuntu"
-		private_key = file(var.private_key)
-		agent = false
-		timeout = "3m"
-	}
-
-	provisioner "remote-exec" {
-		inline = ["sudo K8S_ENDPOINT_HOST=${aws_instance.web.public_dns} CONTAINER_RUNTIME=${var.container_runtime} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/setup.sh ${var.setup_params}"]
-	}
-
-	depends_on = [
-		null_resource.copy_config
 	]
 }
 
