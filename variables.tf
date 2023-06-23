@@ -67,9 +67,10 @@ variable "additional_ingress_ip_ranges" {
 	default = []
 }
 
-variable "ami" {
-	type = string
-	default = ""
+variable "kubernetes" {
+	type = bool
+	description = "install kubernetes components"
+	default = true
 }
 
 variable "container_runtime" {

@@ -228,7 +228,7 @@ resource "null_resource" "install_runtime" {
 
 
 resource "null_resource" "install_kubernetes" {
-	count = !var.legacy_setup ? 1 : 0
+	count = var.kubernetes ? 1 : 0
 
 	connection {
 		host = aws_instance.web.public_ip
