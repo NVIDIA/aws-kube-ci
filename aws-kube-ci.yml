@@ -1,7 +1,7 @@
 .aws_kube_setup:
   stage: aws_kube_setup
   image:
-    name: hashicorp/terraform:light
+    name: hashicorp/terraform:1.5.1
     entrypoint: ["/usr/bin/env"]
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
