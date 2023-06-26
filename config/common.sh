@@ -57,6 +57,6 @@ if [ -f "/etc/os-release" ]; then
     OS="$os_version"
 else
     # Set a default value if we can't read /etc/os-release
-	echo "Unknown OS: $NAME"
+	echo "Unknown OS: can't read /etc/os-release"
     exit 1
 fi
