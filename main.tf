@@ -7,7 +7,7 @@ data "aws_ami" "ubuntu" {
 
 	filter {
 		name = "name"
-		values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+		values = [var.image_name]
 	}
 
 	filter {
@@ -207,7 +207,6 @@ resource "null_resource" "copy_config" {
 }
 
 resource "null_resource" "install_runtime" {
-	count = !var.legacy_setup ? 1 : 0
 
 	connection {
 		host = aws_instance.web.public_ip
@@ -219,7 +218,7 @@ resource "null_resource" "install_runtime" {
 	}
 
 	provisioner "remote-exec" {
-		inline = ["sudo ${local.config_root}/install_${var.container_runtime}.sh"]
+		inline = ["sudo CONTAINERD_VERSION=${var.containerd_version} DOCKER_VERSION=${var.docker_version} CRIO_VERSION=${var.crio_version} CONTAINER_RUNTIME=${var.container_runtime} ${local.config_root}/install_container_runtime.sh"]
 	}
 
 	depends_on = [
@@ -229,7 +228,7 @@ resource "null_resource" "install_runtime" {
 
 
 resource "null_resource" "install_kubernetes" {
-	count = !var.legacy_setup ? 1 : 0
+	count = var.kubernetes_enabled ? 1 : 0
 
 	connection {
 		host = aws_instance.web.public_ip
@@ -241,32 +240,11 @@ resource "null_resource" "install_kubernetes" {
 	}
   	
 	provisioner "remote-exec" {
-		inline = ["sudo K8S_ENDPOINT_HOST=${aws_instance.web.public_dns} CONTAINER_RUNTIME=${var.container_runtime} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/install_kubernetes.sh"]
+		inline = ["sudo K8S_FEATURE_GATES=${var.kubernetes_features} K8S_ENDPOINT_HOST=${aws_instance.web.public_dns} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/install_kubernetes.sh"]
 	}
 
 	depends_on = [
 		null_resource.install_runtime
-	]
-}
-
-resource "null_resource" "legacy_setup" {
-	count = var.legacy_setup ? 1 : 0
-
-	connection {
-		host = aws_instance.web.public_ip
-		type = "ssh"
-		user = "ubuntu"
-		private_key = file(var.private_key)
-		agent = false
-		timeout = "3m"
-	}
-
-	provisioner "remote-exec" {
-		inline = ["sudo K8S_ENDPOINT_HOST=${aws_instance.web.public_dns} CONTAINER_RUNTIME=${var.container_runtime} K8S_VERSION=${var.kubernetes_version} ${local.config_root}/setup.sh ${var.setup_params}"]
-	}
-
-	depends_on = [
-		null_resource.copy_config
 	]
 }
 

@@ -1,6 +1,16 @@
 variable "region" {
   type = string
-  default = "us-west-2"
+  default = "us-east-2"
+}
+
+variable "image_name" {
+  type = string
+  default = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+}
+
+variable "ami" {
+  type = string
+  default = ""
 }
 
 variable "project_name" {
@@ -18,7 +28,7 @@ variable "ci_pipeline_id" {
 variable "instance_type" {
 	type = string
 	description = "Type of instance"
-	default = "p2.xlarge"
+	default = "g4dn.xlarge"
 }
 
 variable "environment" {
@@ -67,25 +77,44 @@ variable "additional_ingress_ip_ranges" {
 	default = []
 }
 
-variable "ami" {
+variable "kubernetes_enabled" {
+	type = bool
+	description = "install kubernetes components"
+	default = true
+}
+
+variable "kubernetes_features" {
 	type = string
+	description = "The kubernetes features to enable"
 	default = ""
 }
 
 variable "container_runtime" {
 	type = string
-	description = "The container runtime to use. [docker | containerd]"
-	default = "docker"
+	description = "The container runtime and it's version to use [containerd | crio | docker ]"
+	default = "containerd"
+}
+
+variable "containerd_version" {
+	type = string
+	description = "The version of containerd to install"
+	default = "1.6.21"
+}
+
+variable "docker_version" {
+	type = string
+	description = "The version of docker to install"
+	default = "latest"
+}
+
+variable "crio_version" {
+	type = string
+	description = "The version of crio to install"
+	default = "1.26"
 }
 
 variable "kubernetes_version" {
 	type = string
 	description = "The version of kubernetes to install"
-	default = "1.23.10"
-}
-
-variable "legacy_setup" {
-	type = bool
-	description = "Use the legacy setup mechanism when launching a node"
-	default = true
+	default = "v1.25.11"
 }
