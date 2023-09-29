@@ -134,7 +134,7 @@ resource "aws_security_group" "allow_k8s_control_plane" {
 
   tags = {
     Name = "Control Plane Load Balancer"
-	KubernetesCluster = "${var.project_name}"
+	KubernetesCluster = var.project_name
   }
 }
 

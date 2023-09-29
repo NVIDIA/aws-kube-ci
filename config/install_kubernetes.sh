@@ -6,10 +6,10 @@ CONFIG_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source ${CONFIG_DIR}/common.sh
 
 # Install kubeadm, kubectl, and k8s-cni
-: ${K8S_VERSION:=v1.25.11}
+: ${K8S_VERSION:=v1.27.6}
 : ${CNI_PLUGINS_VERSION:=v1.3.0}
 : ${CALICO_VERSION:=v3.26.1}
-: ${CRICTL_VERSION:=v1.25.0}
+: ${CRICTL_VERSION:=v1.27.1}
 
 # Configure persistent loading of modules
 tee /etc/modules-load.d/k8s.conf <<EOF
