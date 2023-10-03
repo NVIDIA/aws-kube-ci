@@ -37,7 +37,7 @@ data "http" "gcp_cloudips" {
 
 locals {
 	// get complete list of ip_ranges and split into multiple buckets if the number of ip_ranges exceeds the security group rule limit
-	ip_ranges = length(var.ingress_ip_ranges) > 0 ? var.ingress_ip_ranges : flatten([for o in jsondecode(data.http.gcp_cloudips.body).prefixes : (can(o.ipv4Prefix) && length(regexall("^us-east", o.scope)) > 0) ? [o.ipv4Prefix] : [] ])
+	ip_ranges = length(var.ingress_ip_ranges) > 0 ? var.ingress_ip_ranges : flatten([for o in jsondecode(data.http.gcp_cloudips.response_body).prefixes : (can(o.ipv4Prefix) && length(regexall("^us-east", o.scope)) > 0) ? [o.ipv4Prefix] : [] ])
 	ip_ranges_chunks = chunklist(concat(local.ip_ranges, var.additional_ingress_ip_ranges), var.max_ingress_rules / 2)
 	ip_ranges_chunks_map = { for i in range(length(local.ip_ranges_chunks)): i => local.ip_ranges_chunks[i] }
 	key_name = var.key_name == "" ? "${var.project_name}-key-${var.ci_pipeline_id}" : var.key_name
