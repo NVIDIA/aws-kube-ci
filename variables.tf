@@ -98,7 +98,7 @@ variable "container_runtime" {
 variable "containerd_version" {
 	type = string
 	description = "The version of containerd to install"
-	default = "1.6.21"
+	default = "1.6.24"
 }
 
 variable "docker_version" {
@@ -116,5 +116,5 @@ variable "crio_version" {
 variable "kubernetes_version" {
 	type = string
 	description = "The version of kubernetes to install"
-	default = "v1.25.11"
+	default = "v1.27.6"
 }
