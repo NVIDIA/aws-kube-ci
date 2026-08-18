@@ -1,6 +1,8 @@
 #! /usr/bin/env bash
 set -xe
 
+CONFIG_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 source ${CONFIG_DIR}/common.sh
 
 # Based on https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
